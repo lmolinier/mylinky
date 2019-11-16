@@ -1,4 +1,3 @@
 influxdb
 requests
 argparse
-logging
