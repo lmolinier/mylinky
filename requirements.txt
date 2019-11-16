@@ -1,0 +1,4 @@
+influxdb
+requests
+argparse
+logging
