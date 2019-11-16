@@ -1,3 +1,4 @@
 influxdb
 requests
+requests_toolbelt
 argparse
