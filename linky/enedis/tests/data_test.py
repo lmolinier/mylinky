@@ -72,7 +72,7 @@ class TestData(unittest.TestCase):
     def testTransformData(self):
         l = Data(cookies=None, url="http://testme/data")
 
-        data = l._transform_data(Data.RESOURCE_HOURLY, test_data)
+        data = l._transform_data(Data.RESOURCE_HOURLY, test_data["graphe"])
         log.debug(data)
 
 
