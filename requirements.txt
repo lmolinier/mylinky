@@ -1,5 +1,3 @@
 influxdb
-requests
 requests_toolbelt
-responses
 argparse

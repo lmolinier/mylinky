@@ -2,14 +2,19 @@ FROM python:3.7-alpine as base
 
 FROM base as builder
 
-RUN mkdir /install
-WORKDIR /install
-COPY requirements.txt /requirements.txt
-RUN pip install --install-option="--prefix=/install" -r /requirements.txt
+# Need to add git deps in order to get module version properly
+RUN apk update && apk upgrade && apk add --no-cache git
+
+RUN mkdir /work
+WORKDIR /work
+COPY . /work/
+
+RUN rm -r dist && pip install wheel && python setup.py bdist_wheel
 
 FROM base
-COPY --from=builder /install /usr/local
-COPY src /app
-WORKDIR /app
+RUN mkdir /work
+WORKDIR /work
+COPY --from=builder /work/dist/*.whl /work/
+RUN pip --no-cache-dir install /work/*.whl && rm -r /work
 
-CMD ["gunicorn", "-w 4", "main:app"]
+CMD ["linky", "--help"]
