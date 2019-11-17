@@ -9,7 +9,7 @@ RUN mkdir /work
 WORKDIR /work
 COPY . /work/
 
-RUN rm -r dist && pip install wheel && python setup.py bdist_wheel
+RUN rm -rf dist && pip install wheel && python setup.py bdist_wheel
 
 FROM base
 RUN mkdir /work
