@@ -5,6 +5,9 @@ from setuptools import setup, find_packages
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
+with open("README.md") as f:
+    readme = f.read()
+
 def get_git_version(abbrev=7):
     def is_dirty():
         ## Check for dirty version
@@ -41,6 +44,8 @@ setup(
     author='Lionel Molinier',
     author_email='lionel@molinier.eu',
     description='Linky utility to grab your power consumption from ENEDIS',
+    long_description = readme,
+    long_descritpion_content_type = "text/markdown",
 
     install_requires=required,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*"]),
