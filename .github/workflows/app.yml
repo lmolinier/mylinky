@@ -34,7 +34,8 @@ jobs:
          docker build .
     - name: Build package
       run: |
-        python setup.py build sdist 
+        pip install wheel
+        python setup.py build sdist bdist_wheel
     - name: Publish package to TestPyPI
       #if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
@@ -42,3 +43,9 @@ jobs:
         user: __token__
         password: ${{ secrets.pypi_password }}
         repository_url: https://test.pypi.org/legacy/
+    - name: Publish package to PyPI
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
