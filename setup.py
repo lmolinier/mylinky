@@ -37,7 +37,7 @@ def get_git_version(abbrev=7):
         return None
 
 setup(
-    name='linky',
+    name='mylinky',
     version=get_git_version(),
     url='https://github.com/x3n1x/linky',
     license='MIT',
@@ -52,7 +52,7 @@ setup(
 
     entry_points = {
 		"console_scripts": [
-			"linky = linky.entrypoint:main"
+			"mylinky = mylinky.entrypoint:main"
 		]
 	},
 )

@@ -24,8 +24,8 @@ import pprint
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-from linky.enedis import Enedis
-from linky.exporter import InfluxdbExporter
+from mylinky.enedis import Enedis
+from mylinky.exporter import InfluxdbExporter
 
 __all__ = []
 __version__ = "UNKNOWN"
