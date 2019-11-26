@@ -18,6 +18,8 @@ import os
 import logging
 import pkg_resources
 import datetime
+import argparse
+import pprint
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -43,6 +45,11 @@ DEBUG = 1
 TESTRUN = 0
 PROFILE = 0
 
+def datetime_converter(s):
+    try:
+        return datetime.datetime.strptime(s, "%d/%m/%Y")
+    except ValueError:
+        raise argparse.ArgumentTypeError("Invalid date (DD/MM/YYYY): %s" % s)
 
 def main(argv=None): # IGNORE:C0111
     '''Command line options.'''
@@ -70,11 +77,20 @@ USAGE
         parser.add_argument('-v', '--verbose', action='count', default=0, help="set verbosity level [default: %(default)s]")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         
-        subparsers = parser.add_subparsers(help="importer help", dest="importer")
+        group = parser.add_argument_group("importer", "Data importer parameters")
+        group.add_argument("--importer", choices=["enedis"], help="select importer [default: %(default)s]", default="enedis")
 
-        subparser = subparsers.add_parser("enedis", help="Import from ENEDIS website")
-        subparser.add_argument('-u', '--username', help="Enedis username")
-        subparser.add_argument('-p', '--password', help="Enedis password")
+        enedis = group.add_argument_group("enedis", "ENEDIS Access and Data paremeters")
+        enedis.add_argument('-u', '--username', help="Enedis username")
+        enedis.add_argument('-p', '--password', help="Enedis password")
+
+        parser.add_argument("--type", choices=["hourly", "daily", "monthly"], help="query data source")
+
+        date = parser.add_argument_group("date range", "select the date range")
+        date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now())
+        group = date.add_mutually_exclusive_group()
+        group.add_argument("--from", help="from/start query date range (format DD/MM/YYYY)", type=datetime_converter)
+        group.add_argument("--last", help="query for last days", type=int)
 
         subparsers = parser.add_subparsers(help='exporter help', dest="exporter")
 
@@ -83,6 +99,9 @@ USAGE
         subparser.add_argument("--db", required=True, help="Database name")
         subparser.add_argument("--dbuser", required=True, help="Database username")
         subparser.add_argument("--dbpassword", required=True, help="Database password")
+
+        subparser = subparsers.add_parser("stdout", help="Export to STDOUT")
+        subparser.add_argument("--pretty", help="enable pretty printing")
 
         args = parser.parse_args()
         kwargs = vars(args)
@@ -98,12 +117,20 @@ USAGE
 
         enedis = Enedis()
         enedis.login(args.username, args.password)
-        data = enedis.getdata(Enedis.HOURLY, startDate=datetime.datetime.strptime("14/11/2019", "%d/%m/%Y"))
+
+        startDate = kwargs["from"]
+        endDate = kwargs["to"]
+        if args.last:
+            startDate = endDate - datetime.timedelta(days=args.last)
+
+        data = enedis.getdata(Enedis.HOURLY, startDate=startDate, endDate=endDate)
 
         if args.exporter == "influxdb":
             (host,port) = args.host.split(":")
             influx = InfluxdbExporter(host=host, port=port, database=args.db, username=args.dbuser, password=args.dbpassword)
             influx.save_data("hourly", data)
+        elif args.exporter == "stdout":
+            pprint.pprint(data)
 
         return 0
 

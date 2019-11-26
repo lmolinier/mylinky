@@ -17,4 +17,4 @@ WORKDIR /work
 COPY --from=builder /work/dist/*.whl /work/
 RUN pip --no-cache-dir install /work/*.whl && rm -r /work
 
-CMD ["linky", "--help"]
+CMD ["linky"]
