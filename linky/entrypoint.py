@@ -84,7 +84,7 @@ USAGE
         enedis.add_argument('-u', '--username', help="Enedis username")
         enedis.add_argument('-p', '--password', help="Enedis password")
 
-        parser.add_argument("--type", choices=["hourly", "daily", "monthly"], help="query data source")
+        parser.add_argument("--type", choices=[Enedis.HOURLY, Enedis.MONTHLY, Enedis.YEARLY], help="query data source")
 
         date = parser.add_argument_group("date range", "select the date range")
         date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now())
@@ -123,7 +123,7 @@ USAGE
         if args.last:
             startDate = endDate - datetime.timedelta(days=args.last)
 
-        data = enedis.getdata(Enedis.HOURLY, startDate=startDate, endDate=endDate)
+        data = enedis.getdata(args.type, startDate=startDate, endDate=endDate)
 
         if args.exporter == "influxdb":
             (host,port) = args.host.split(":")
