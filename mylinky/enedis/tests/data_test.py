@@ -4,7 +4,7 @@ import requests
 import responses
 import logging
 
-from linky.enedis import Data
+from mylinky.enedis import Data
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)

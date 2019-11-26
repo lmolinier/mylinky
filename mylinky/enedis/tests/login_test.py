@@ -2,7 +2,7 @@ import unittest
 import responses
 import logging
 
-from linky.enedis import Login, LoginException
+from mylinky.enedis import Login, LoginException
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
