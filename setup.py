@@ -45,7 +45,7 @@ setup(
     author_email='lionel@molinier.eu',
     description='Linky utility to grab your power consumption from ENEDIS',
     long_description = readme,
-    long_descritpion_content_type = "text/markdown",
+    long_description_content_type = "text/markdown",
 
     install_requires=required,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*"]),
