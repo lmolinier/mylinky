@@ -32,17 +32,16 @@ jobs:
     - name: Build docker image
       run: |
          docker build .
+    - name: Publish to Docker Hub
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: lmolinier/mylinky
+        username: ${{ secrets.docker_username }}
+        password: ${{ secrets.docker_password }}
     - name: Build package
       run: |
         pip install wheel
         python setup.py build sdist bdist_wheel
-    - name: Publish package to TestPyPI
-      #if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.test_pypi_password }}
-        repository_url: https://test.pypi.org/legacy/
     - name: Publish package to PyPI
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
