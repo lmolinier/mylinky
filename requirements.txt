@@ -1,3 +1,4 @@
 influxdb
 requests_toolbelt
 argparse
+pyyaml

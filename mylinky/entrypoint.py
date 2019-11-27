@@ -26,6 +26,7 @@ from argparse import RawDescriptionHelpFormatter
 
 from mylinky.enedis import Enedis
 from mylinky.exporter import InfluxdbExporter
+from mylinky import MyLinkyConfig
 
 __all__ = []
 __version__ = "UNKNOWN"
@@ -72,10 +73,13 @@ USAGE
 ''' % (program_shortdesc, str(__date__))
 
     try:
+        config = MyLinkyConfig()
+
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument('-v', '--verbose', action='count', default=0, help="set verbosity level [default: %(default)s]")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
+        parser.add_argument('-c', "--config", help="configuration file")
         
         group = parser.add_argument_group("importer", "Data importer parameters")
         group.add_argument("--importer", choices=["enedis"], help="select importer [default: %(default)s]", default="enedis")
@@ -95,8 +99,8 @@ USAGE
         subparsers = parser.add_subparsers(help='exporter help', dest="exporter")
 
         subparser = subparsers.add_parser("influxdb", help="Export to InfluxDB")
-        subparser.add_argument("--host", default="localhost:8086", help="Database hostname [default: %(default)]")
-        subparser.add_argument("--db", required=True, help="Database name")
+        subparser.add_argument("--host", default="%s:%s" % (config.data["influxdb"]["host"], config.data["influxdb"]["port"]), help="Database hostname [default: %(default)]")
+        subparser.add_argument("--db", default=config.data["influxdb"]["database"], required=True, help="Database name")
         subparser.add_argument("--dbuser", required=True, help="Database username")
         subparser.add_argument("--dbpassword", required=True, help="Database password")
 
@@ -114,9 +118,13 @@ USAGE
 
         log.debug("args: %s" % args)
         log.debug("kwargs: %s" % kwargs)
+        if args.config:
+            config.load_from_file(args.config)
+        config.override_from_args(kwargs)
+        log.debug("config: %s" % config)
 
         enedis = Enedis()
-        enedis.login(args.username, args.password)
+        enedis.login(config["enedis"]["user"], config["enedis"]["password"])
 
         startDate = kwargs["from"]
         endDate = kwargs["to"]
@@ -127,7 +135,14 @@ USAGE
 
         if args.exporter == "influxdb":
             (host,port) = args.host.split(":")
-            influx = InfluxdbExporter(host=host, port=port, database=args.db, username=args.dbuser, password=args.dbpassword)
+            influx = InfluxdbExporter(
+                host=config["influxdb"]["host"], 
+                port=config["influxdb"]["port"],
+                database=config["influxdb"]["database"],
+                username=config["influxdb"]["user"],
+                password=config["influxdb"]["password"]
+            )
+
             influx.save_data("hourly", data)
         elif args.exporter == "stdout":
             pprint.pprint(data)
