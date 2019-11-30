@@ -88,13 +88,13 @@ USAGE
         enedis.add_argument('-u', '--username', help="Enedis username")
         enedis.add_argument('-p', '--password', help="Enedis password")
 
-        parser.add_argument("--type", choices=Enedis.RESOURCE.keys(), help="query data source")
+        parser.add_argument("--type", choices=Enedis.RESOURCE.keys(), default="hourly", help="query data source (default: %(default)s)")
 
         date = parser.add_argument_group("date range", "select the date range")
         date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now())
         group = date.add_mutually_exclusive_group()
         group.add_argument("--from", help="from/start query date range (format DD/MM/YYYY)", type=datetime_converter)
-        group.add_argument("--last", help="query for last days", type=int)
+        group.add_argument("--last", help="query for last days", default=1, type=int)
 
         subparsers = parser.add_subparsers(help='exporter help', dest="exporter")
 
@@ -121,14 +121,14 @@ USAGE
         if args.config:
             config.load_from_file(args.config)
         config.override_from_args(kwargs)
-        log.debug("config: %s" % config)
+        log.debug("config: %s" % config.data)
 
         enedis = Enedis()
-        enedis.login(config["enedis"]["user"], config["enedis"]["password"])
+        enedis.login(config["enedis"]["username"], config["enedis"]["password"])
 
         startDate = kwargs["from"]
         endDate = kwargs["to"]
-        if args.last:
+        if startDate is None and args.last:
             startDate = endDate - datetime.timedelta(days=args.last)
 
         data = enedis.getdata(args.type, startDate=startDate, endDate=endDate)

@@ -1,3 +1,6 @@
+# remove personal sample
+sample/home.yml
+
 # vscode
 .vscode
 

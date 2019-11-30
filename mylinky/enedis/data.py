@@ -67,14 +67,16 @@ class Data:
             #  - if value is '-2', there is no value --> drop
             if str(item["valeur"]) == "-2":
                 continue
-
-            data.append({'date': start + (rank*step), 'value': value, 'type': self._get_type(start + (rank*step)), 'price': 0.0})
+            d = {'date': start + (rank*step), 'value': value}
+            if resource == Data.RESOURCE_HOURLY:
+                d.update({'type': self._get_type(start + (rank*step))})
+            data.append(d)
 
         return data
 
     def _query_data(self, resource, startDate, endDate):
 
-        self.session.headers.update({'User-agent': "linky crawler"})
+        self.session.headers.update({'User-agent': "mylinky"})
         payload = {
             '_lincspartdisplaycdc_WAR_lincspartcdcportlet_dateDebut': startDate.strftime("%d/%m/%Y"),
             '_lincspartdisplaycdc_WAR_lincspartcdcportlet_dateFin': endDate.strftime("%d/%m/%Y")
@@ -104,7 +106,7 @@ class Data:
         body = resp.json()
 
         if body["etat"]["valeur"] == "erreur":
-            raise DataException("Error on server when retrieving data: %s" % body["etat"]["erreurText"])
+            raise DataException("Error on server when retrieving data: %s" % body["etat"]["erreurText"] if "erreurText" in body["etat"] else "n/a")
 
         if body["etat"]["valeur"] not in ["termine"]:
             raise DataException("Invalid response state code '%s'" % body["etat"]["valeur"])

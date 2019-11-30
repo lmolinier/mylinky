@@ -17,7 +17,7 @@ class Login:
         log.debug("Creating login (%s) with session %s" % (self.url, self.session))
 
     def login(self, username, password):
-        self.session.headers.update({'User-agent': "linky crawler"})
+        self.session.headers.update({'User-agent': "mylinky"})
         payload = {
             'IDToken1': username,
             'IDToken2': password,

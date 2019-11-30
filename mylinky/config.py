@@ -7,7 +7,7 @@ class MyLinkyConfig():
     def __init__(self):
         self.data = { 
             "enedis": {
-                "user": None,
+                "username": None,
                 "password": None
             },
             "influxdb" : {
@@ -23,7 +23,8 @@ class MyLinkyConfig():
         with open(fname) as f:
             data = yaml.load(f)
         log.debug("using configuration: %s" % data)
-        self.data = data
+        self.data.update(data)
+        log.debug("config: %s" % self.data)
         return self
 
     def __getitem__(self, key):
