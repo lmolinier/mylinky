@@ -84,7 +84,7 @@ class TestData(unittest.TestCase):
         timesheet = [("00:00", "06:30")]
         l = Data(cookies=None, url="http://testme/data", timesheet=timesheet)
         t = l._get_type(datetime.datetime(2019,1,1,1,30))
-        self.assertEqual(t, "normales")
+        self.assertEqual(t, "normale")
 
 
 if __name__ == "__main__":
