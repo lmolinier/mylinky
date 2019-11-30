@@ -139,7 +139,7 @@ USAGE
                 host=config["influxdb"]["host"], 
                 port=config["influxdb"]["port"],
                 database=config["influxdb"]["database"],
-                username=config["influxdb"]["user"],
+                username=config["influxdb"]["username"],
                 password=config["influxdb"]["password"]
             )
 
