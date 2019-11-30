@@ -31,19 +31,19 @@ class MyLinkyConfig():
 
     def override_from_args(self, kwargs):
         # ENEDIS Access
-        if "username" in kwargs:
+        if "username" in kwargs and kwargs["username"] is not None:
             self.data["enedis"]["user"] = kwargs["username"]
-        if "password" in kwargs:
+        if "password" in kwargs and kwargs["password"] is not None:
             self.data["enedis"]["password"] = kwargs["password"]
 
         ## INFLUXDB
-        if "host" in kwargs:
+        if "host" in kwargs and kwargs["host"] is not None:
             (host,port) = kwargs["host"].split(":")
             self.data["influxdb"]["host"] = host
             self.data["influxdb"]["port"] = port
-        if "dbuser" in kwargs:
+        if "dbuser" in kwargs and kwargs["dbuser"] is not None:
             self.data["influxdb"]["user"] = kwargs["dbuser"]
-        if "dbpassword" in kwargs:
+        if "dbpassword" in kwargs and kwargs["dbpassword"] is not None:
             self.data["influxdb"]["password"] = kwargs["dbpassword"]
-        if "db" in kwargs:
+        if "db" in kwargs and kwargs["db"] is not None:
             self.data["influxdb"]["database"] = kwargs["db"]

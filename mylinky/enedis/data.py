@@ -22,9 +22,10 @@ class Data:
         RESOURCE_YEARLY: datetime.timedelta(days=1),
     }
 
-    def __init__(self, cookies, url=None):
+    def __init__(self, cookies, timesheet=None, url=None):
         self.url = url if url is not None else Data.URL
         self.session = requests.Session()
+        self.timesheet = timesheet
 
         if cookies is not None:
             if type(cookies) != list:
@@ -39,6 +40,18 @@ class Data:
 
         data = self._transform_data(resource, raw)
         return data
+
+    def _get_type(self, startdate):
+        daytime = startdate.time()
+        if self.timesheet is None:
+            return "normale"
+        
+        for (stime, etime) in self.timesheet:
+            pass
+
+        return "normale"
+
+        
 
     def _transform_data(self, resource, raw):
         start = datetime.datetime.strptime(raw["periode"]["dateDebut"], "%d/%m/%Y")
@@ -55,7 +68,7 @@ class Data:
             if str(item["valeur"]) == "-2":
                 continue
 
-            data.append({'date': start + (rank*step), 'value': value, 'type': 'normales', 'price': 0.0})
+            data.append({'date': start + (rank*step), 'value': value, 'type': self._get_type(start + (rank*step)), 'price': 0.0})
 
         return data
 

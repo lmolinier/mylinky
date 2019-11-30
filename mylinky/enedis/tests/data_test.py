@@ -75,6 +75,17 @@ class TestData(unittest.TestCase):
         data = l._transform_data(Data.RESOURCE_HOURLY, test_data["graphe"])
         log.debug(data)
 
+    def testTimesheetEmpty(self):
+        l = Data(cookies=None, url="http://testme/data")
+        t = l._get_type(datetime.datetime(2019,1,1,1,30))
+        self.assertEqual(t, "normale")
+
+    def testTimesheet(self):
+        timesheet = [("00:00", "06:30")]
+        l = Data(cookies=None, url="http://testme/data", timesheet=timesheet)
+        t = l._get_type(datetime.datetime(2019,1,1,1,30))
+        self.assertEqual(t, "normales")
+
 
 if __name__ == "__main__":
     unittest.main()
