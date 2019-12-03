@@ -15,7 +15,8 @@ class MyLinkyConfig():
                 "port": 8086,
                 "database": "linky",
                 "user": None,
-                "password": None
+                "password": None,
+                "measurement-prefix": "linky_"
             }
         }
 

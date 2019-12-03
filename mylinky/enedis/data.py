@@ -4,6 +4,8 @@ import datetime
 from requests_toolbelt.utils import dump
 import base64
 
+from mylinky.datedelta import datedelta
+
 log = logging.getLogger("enedis-data")
 
 class DataException(Exception):
@@ -17,9 +19,9 @@ class Data:
     RESOURCE_YEARLY = "urlCdcAn"
 
     STEPS = {
-        RESOURCE_HOURLY: datetime.timedelta(minutes=30),
-        RESOURCE_MONTHLY: datetime.timedelta(hours=1),
-        RESOURCE_YEARLY: datetime.timedelta(days=1),
+        RESOURCE_HOURLY: datedelta(minutes=30),
+        RESOURCE_MONTHLY: datedelta(months=1),
+        RESOURCE_YEARLY: datedelta(years=1),
     }
 
     def __init__(self, cookies, timesheet=None, url=None):
@@ -63,11 +65,15 @@ class Data:
             rank = int(item["ordre"])-1
             value = float(item["valeur"])
 
+            begin = start + (rank*step)
+            end = start + ((rank+1)*step)
+            duration = end - begin
+
             # Value is given in kW
             #  - if value is '-2', there is no value --> drop
             if str(item["valeur"]) == "-2":
                 continue
-            d = {'date': start + (rank*step), 'value': value}
+            d = {'date': begin, 'duration': duration.total_seconds(), 'value': value}
             if resource == Data.RESOURCE_HOURLY:
                 d.update({'type': self._get_type(start + (rank*step))})
             data.append(d)

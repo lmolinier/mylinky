@@ -1,3 +1,11 @@
 enedis:
   username: "myenedisuser"
   password: "myenedispassword"
+
+influxdb:
+  host: "localhost"
+  port: 123
+  username: "myinfludbuser"
+  password: "myinfludbpassword"
+  database: "mydatabase"
+  measurement-prefix: "linky_"

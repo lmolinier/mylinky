@@ -18,5 +18,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.config["enedis"]["username"], "myenedisuser")
         self.assertEqual(self.config["enedis"]["password"], "myenedispassword")
 
+        self.assertEqual(self.config["influxdb"]["measurement-prefix"], "linky_")
+
 if __name__ == "__main__":
     unittest.main()

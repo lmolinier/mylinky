@@ -24,6 +24,7 @@ import pprint
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
+from mylinky.datedelta import datedelta
 from mylinky.enedis import Enedis
 from mylinky.exporter import InfluxdbExporter
 from mylinky import MyLinkyConfig
@@ -33,7 +34,7 @@ __version__ = "UNKNOWN"
 __date__ = '2019-11-15'
 
 try:
-    __version__ = pkg_resources.get_distribution("linky").version
+    __version__ = pkg_resources.get_distribution("mylinky").version
 except pkg_resources.DistributionNotFound:
     pass
 
@@ -51,6 +52,12 @@ def datetime_converter(s):
         return datetime.datetime.strptime(s, "%d/%m/%Y")
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date (DD/MM/YYYY): %s" % s)
+
+def datedelta_converter(s):
+    try:
+        return datedelta.from_natural_str(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError("Cannot parse date delta (e.g: '1d', '1m', ...)")
 
 def main(argv=None): # IGNORE:C0111
     '''Command line options.'''
@@ -94,15 +101,15 @@ USAGE
         date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now())
         group = date.add_mutually_exclusive_group()
         group.add_argument("--from", help="from/start query date range (format DD/MM/YYYY)", type=datetime_converter)
-        group.add_argument("--last", help="query for last days", default=1, type=int)
+        group.add_argument("--last", help="query for last days/months/year depending 'type'", type=datedelta_converter)
 
         subparsers = parser.add_subparsers(help='exporter help', dest="exporter")
 
         subparser = subparsers.add_parser("influxdb", help="Export to InfluxDB")
         subparser.add_argument("--host", default="%s:%s" % (config.data["influxdb"]["host"], config.data["influxdb"]["port"]), help="Database hostname [default: %(default)]")
-        subparser.add_argument("--db", default=config.data["influxdb"]["database"], required=True, help="Database name")
-        subparser.add_argument("--dbuser", required=True, help="Database username")
-        subparser.add_argument("--dbpassword", required=True, help="Database password")
+        subparser.add_argument("--db", default=config.data["influxdb"]["database"], help="Database name")
+        subparser.add_argument("--dbuser", help="Database username")
+        subparser.add_argument("--dbpassword", help="Database password")
 
         subparser = subparsers.add_parser("stdout", help="Export to STDOUT")
         subparser.add_argument("--pretty", help="enable pretty printing")
@@ -128,8 +135,11 @@ USAGE
 
         startDate = kwargs["from"]
         endDate = kwargs["to"]
-        if startDate is None and args.last:
-            startDate = endDate - datetime.timedelta(days=args.last)
+        if startDate is None:
+            delta = args.last
+            if not delta:
+                delta = {"hourly": datedelta(days=1), "monthly": datedelta(months=1), "yearly": datedelta(years=1) }[args.type]
+            startDate = endDate - delta
 
         data = enedis.getdata(args.type, startDate=startDate, endDate=endDate)
 
@@ -140,10 +150,11 @@ USAGE
                 port=config["influxdb"]["port"],
                 database=config["influxdb"]["database"],
                 username=config["influxdb"]["username"],
-                password=config["influxdb"]["password"]
+                password=config["influxdb"]["password"],
+                prefix=config["influxdb"]["measurement-prefix"]
             )
 
-            influx.save_data("hourly", data)
+            influx.save_data(args.type, data)
         elif args.exporter == "stdout":
             pprint.pprint(data)
 

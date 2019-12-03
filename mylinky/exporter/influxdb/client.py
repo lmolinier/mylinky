@@ -2,6 +2,8 @@ from influxdb import InfluxDBClient
 
 class InfluxdbExporter:
     def __init__(self, **kwargs):
+        self.prefix = kwargs["prefix"]
+        del kwargs["prefix"]
         self.client = InfluxDBClient(**kwargs)
 
     def connect(self):
@@ -11,15 +13,14 @@ class InfluxdbExporter:
         d = []
         for item in data:
             d.append({
-                "measurement": serie,
+                "measurement": "%s%s"% (self.prefix, serie),
                 "tags": {
-                    "batchid" : batchid,
-                    "type" : item["type"],
+                    "batchid" : batchid
                 },
                 "time": item['date'].strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "fields": {
                     "value": (item['value']*1000),
-                    "price": (item['price']),
+                    "duration": item['duration']
                 }
             })
 
