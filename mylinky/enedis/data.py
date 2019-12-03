@@ -40,7 +40,7 @@ class Data:
     def get_data(self, resource, startDate=datetime.datetime(year=1970, month=1, day=1), endDate=datetime.datetime.today()):
         raw = self._query_data(resource, startDate, endDate)
 
-        data = self._transform_data(resource, raw)
+        data = self._transform_data(resource, raw, (startDate, endDate))
         return data
 
     def _get_type(self, startdate):
@@ -55,23 +55,38 @@ class Data:
 
         
 
-    def _transform_data(self, resource, raw):
+    def _transform_data(self, resource, raw, bounds=None):
         start = datetime.datetime.strptime(raw["periode"]["dateDebut"], "%d/%m/%Y")
         end = datetime.datetime.strptime(raw["periode"]["dateFin"], "%d/%m/%Y")
         step = Data.STEPS[resource]
 
+        if resource == Data.RESOURCE_YEARLY:
+            start = start.replace(day=1, month=1)
+            end = end.replace(day=1, month=1) - datetime.timedelta(days=1)
+
+
         data = []
+        offset = raw["decalage"] - 1 if raw["decalage"]>0 else 0
         for item in raw["data"]:
-            rank = int(item["ordre"])-1
+            rank = int(item["ordre"])
+
+            # correct the start with the 'decalage' field for incomplete graphe
+            if rank < offset:
+                continue
+            rank = rank - offset
             value = float(item["valeur"])
 
             begin = start + (rank*step)
             end = start + ((rank+1)*step)
             duration = end - begin
 
+            if bounds and (begin < bounds[0] or begin >= bounds[1]):
+                continue
+
             # Value is given in kW
             #  - if value is '-2', there is no value --> drop
-            if str(item["valeur"]) == "-2":
+            #  - if value is '-1', TODO
+            if item["valeur"] < 0:
                 continue
             d = {'date': begin, 'duration': duration.total_seconds(), 'value': value}
             if resource == Data.RESOURCE_HOURLY:
