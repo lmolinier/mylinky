@@ -95,5 +95,28 @@ class TestDateDelta(unittest.TestCase):
         log.debug(dd)
         self.assertEqual(dd.months, 3*12*5)
 
+    def testFromNatural(self):
+        dd = datedelta.from_natural_str("2 days")
+        log.debug(dd)
+        self.assertEqual(dd.days, 2)
+
+        dd = datedelta.from_natural_str("1month, 2 days")
+        log.debug(dd)
+        self.assertEqual(dd.months, 1)
+        self.assertEqual(dd.days, 2)
+
+        dd = datedelta.from_natural_str("1m")
+        log.debug(dd)
+        self.assertEqual(dd.months, 1)
+
+        dd = datedelta.from_natural_str("10 d")
+        log.debug(dd)
+        self.assertEqual(dd.days, 10)
+
+        dd = datedelta.from_natural_str("1year")
+        log.debug(dd)
+        self.assertEqual(dd.months, 12)
+
+
 if __name__ == "__main__":
     unittest.main()

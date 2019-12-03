@@ -1,4 +1,5 @@
 import datetime
+import re
 
 
 class datedelta:
@@ -17,6 +18,17 @@ class datedelta:
     @classmethod
     def from_timedelta(cls, td):
         return datedelta(0, 0, td.days, td.seconds, td.microseconds)
+
+    @classmethod
+    def from_natural_str(cls, s):
+        m = re.match("((?P<years>[\d]*)[\s]*y(ear(s)*)*)*(,\s)*((?P<months>[\d]*)[\s]*m(onth(s)*)*)*(,\s)*((?P<days>[\d]*)[\s]*d(ay(s)*)*)*(,\s)*", s)
+        if m is None:
+            raise ValueError("cannot match string format (e.g: '1m, 1 days')")
+        years = int(m.group("years")) if m.group("years") else 0
+        months = int(m.group("months")) if m.group("months") else 0
+        months+= years * 12
+        days = int(m.group("days")) if m.group("days") else 0
+        return datedelta(months, days)
 
     def __repr__(self):
         args = []
@@ -55,6 +67,11 @@ class datedelta:
     def months(self):
         """months"""
         return self._months
+
+    @property
+    def days(self):
+        """days"""
+        return self._timedelta.days
 
     def __add__(self, other):
         if isinstance(other, datetime.timedelta):
