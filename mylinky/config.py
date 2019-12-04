@@ -18,7 +18,7 @@ class MyLinkyConfig():
                 "host": "localhost",
                 "port": 8086,
                 "database": "linky",
-                "user": None,
+                "username": None,
                 "password": None,
                 "measurement-prefix": "linky_"
             }
@@ -63,7 +63,7 @@ class MyLinkyConfig():
             self.data["influxdb"]["host"] = host
             self.data["influxdb"]["port"] = port
         if "dbuser" in kwargs and kwargs["dbuser"] is not None:
-            self.data["influxdb"]["user"] = kwargs["dbuser"]
+            self.data["influxdb"]["username"] = kwargs["dbuser"]
         if "dbpassword" in kwargs and kwargs["dbpassword"] is not None:
             self.data["influxdb"]["password"] = kwargs["dbpassword"]
         if "db" in kwargs and kwargs["db"] is not None:
