@@ -12,11 +12,15 @@ class InfluxdbExporter:
     def save_data(self, serie, data, batchid=0):
         d = []
         for item in data:
+            tags = {
+                "batchid" : batchid
+            }
+            if "type" in item:
+                tags["type"] = item["type"]
+
             d.append({
                 "measurement": "%s%s"% (self.prefix, serie),
-                "tags": {
-                    "batchid" : batchid
-                },
+                "tags": tags,
                 "time": item['date'].strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "fields": {
                     "value": (item['value']*1000),
