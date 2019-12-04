@@ -114,8 +114,8 @@ USAGE
         subparsers = parser.add_subparsers(help='exporter help', dest="exporter")
 
         subparser = subparsers.add_parser("influxdb", help="Export to InfluxDB")
-        subparser.add_argument("--host", default="%s:%s" % (config.data["influxdb"]["host"], config.data["influxdb"]["port"]), help="Database hostname [default: %(default)]")
-        subparser.add_argument("--db", default=config.data["influxdb"]["database"], help="Database name")
+        subparser.add_argument("--host", help="Database hostname")
+        subparser.add_argument("--db", help="Database name")
         subparser.add_argument("--dbuser", help="Database username")
         subparser.add_argument("--dbpassword", help="Database password")
 
