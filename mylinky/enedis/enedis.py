@@ -13,17 +13,22 @@ class Enedis:
         "yearly": Data.RESOURCE_YEARLY
     }
 
-    def __init__(self, url=None, url2=None):
+    def __init__(self, url=None, url2=None, timesheets=None):
         self._login = Login(url)
         self._url2 = url2
         self._cookies = None
+        self._timesheets = timesheets
 
     def login(self, username, password):
         cookies = self._login.login(username, password)
         self._cookies = cookies
 
+    @classmethod
+    def parsetimesheet(cls, start, end):
+        return (datetime.datetime.strptime(start, "%H:%M").time(), datetime.datetime.strptime(end, "%H:%M").time())
+
     def getdata(self, kind, **kwargs):
-        h = Data(self._cookies, url=self._url2)
+        h = Data(self._cookies, url=self._url2, timesheets=self._timesheets)
 
         # normalize date
         if kind == "monthly":

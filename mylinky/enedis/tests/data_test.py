@@ -5,7 +5,7 @@ import responses
 import logging
 import json
 
-from mylinky.enedis import Data
+from mylinky.enedis import Enedis, Data
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -135,12 +135,23 @@ class TestData(unittest.TestCase):
         t = l._get_type(datetime.datetime(2019,1,1,1,30))
         self.assertEqual(t, "normale")
 
-    def testTimesheet(self):
-        timesheet = [("00:00", "06:30")]
-        l = Data(cookies=None, url="http://testme/data", timesheet=timesheet)
+    def testTimesheetSimple(self):
+        timesheets = [Enedis.parsetimesheet("00:00", "06:00")]
+        l = Data(cookies=None, url="http://testme/data", timesheets=timesheets)
         t = l._get_type(datetime.datetime(2019,1,1,1,30))
-        self.assertEqual(t, "normale")
+        self.assertEqual(t, "creuse")
+        t = l._get_type(datetime.datetime(2019,1,1,7,30))
+        self.assertEqual(t, "pleine")
 
+    def testTimesheetCrossMidnight(self):
+        timesheets = [Enedis.parsetimesheet("22:00", "06:00")]
+        l = Data(cookies=None, url="http://testme/data", timesheets=timesheets)
+        t = l._get_type(datetime.datetime(2019,1,1,1,30))
+        self.assertEqual(t, "creuse")
+        t = l._get_type(datetime.datetime(2019,1,1,23,30))
+        self.assertEqual(t, "creuse")
+        t = l._get_type(datetime.datetime(2019,1,1,7,30))
+        self.assertEqual(t, "pleine")
 
 if __name__ == "__main__":
     unittest.main()

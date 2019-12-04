@@ -59,6 +59,13 @@ def datedelta_converter(s):
     except ValueError:
         raise argparse.ArgumentTypeError("Cannot parse date delta (e.g: '1d', '1m', ...)")
 
+def timesheet_converter(s):
+    try:
+        (begin,end) = s.split(",")
+        return Enedis.parsetimesheet(begin, end)
+    except ValueError:
+        raise argparse.ArgumentTypeError("Cannot parse timesheet 'time:time', with time '%h:%m'")
+
 def main(argv=None): # IGNORE:C0111
     '''Command line options.'''
     if argv is None:
@@ -94,6 +101,7 @@ USAGE
         enedis = group.add_argument_group("enedis", "ENEDIS Access and Data paremeters")
         enedis.add_argument('-u', '--username', help="Enedis username")
         enedis.add_argument('-p', '--password', help="Enedis password")
+        enedis.add_argument("--timesheet", action="append", type=timesheet_converter, help="enter new HP/HC timesheet")
 
         parser.add_argument("--type", choices=Enedis.RESOURCE.keys(), default="hourly", help="query data source (default: %(default)s)")
 
@@ -130,7 +138,7 @@ USAGE
         config.override_from_args(kwargs)
         log.debug("config: %s" % config.data)
 
-        enedis = Enedis()
+        enedis = Enedis(timesheets=config["enedis"]["timesheets"])
         enedis.login(config["enedis"]["username"], config["enedis"]["password"])
 
         startDate = kwargs["from"]

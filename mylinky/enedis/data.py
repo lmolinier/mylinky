@@ -24,10 +24,10 @@ class Data:
         RESOURCE_YEARLY: datedelta(years=1),
     }
 
-    def __init__(self, cookies, timesheet=None, url=None):
+    def __init__(self, cookies, timesheets=None, url=None):
         self.url = url if url is not None else Data.URL
         self.session = requests.Session()
-        self.timesheet = timesheet
+        self.timesheets = timesheets
 
         if cookies is not None:
             if type(cookies) != list:
@@ -45,13 +45,23 @@ class Data:
 
     def _get_type(self, startdate):
         daytime = startdate.time()
-        if self.timesheet is None:
+        if self.timesheets is None:
             return "normale"
         
-        for (stime, etime) in self.timesheet:
-            pass
+        for (stime, etime) in self.timesheets:
+            if stime<etime:
+                # not crossing a day, this is
+                # the normal case
+                # e.g.: 00:00 --> 06:00
+                if daytime >= stime and daytime < etime:
+                    return "creuse"
+            else:
+                # we are crossing a day
+                # e.g.: 22:00 --> 06:30
+                if daytime >= stime or daytime < etime:
+                    return "creuse"
 
-        return "normale"
+        return "pleine"
 
         
 
@@ -72,7 +82,6 @@ class Data:
             # apparently, the yearly data is a bit different and start its 'ordre' to 0, instead of 1...
             if resource == Data.RESOURCE_YEARLY:
                 rank+=1
-
 
             # correct the start with the 'decalage' field for incomplete graphe
             if rank < offset:
