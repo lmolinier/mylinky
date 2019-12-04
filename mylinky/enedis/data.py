@@ -62,13 +62,17 @@ class Data:
 
         if resource == Data.RESOURCE_YEARLY:
             start = start.replace(day=1, month=1)
-            end = end.replace(day=1, month=1) - datetime.timedelta(days=1)
-
+            end = end.replace(day=1, month=1)
 
         data = []
         offset = raw["decalage"] - 1 if raw["decalage"]>0 else 0
         for item in raw["data"]:
-            rank = int(item["ordre"])
+            rank = int(item["ordre"])-1
+
+            # apparently, the yearly data is a bit different and start its 'ordre' to 0, instead of 1...
+            if resource == Data.RESOURCE_YEARLY:
+                rank+=1
+
 
             # correct the start with the 'decalage' field for incomplete graphe
             if rank < offset:
@@ -98,6 +102,8 @@ class Data:
     def _query_data(self, resource, startDate, endDate):
 
         self.session.headers.update({'User-agent': "mylinky"})
+
+        # note: payload is useless for yearly resource
         payload = {
             '_lincspartdisplaycdc_WAR_lincspartcdcportlet_dateDebut': startDate.strftime("%d/%m/%Y"),
             '_lincspartdisplaycdc_WAR_lincspartcdcportlet_dateFin': endDate.strftime("%d/%m/%Y")

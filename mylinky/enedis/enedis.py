@@ -27,11 +27,11 @@ class Enedis:
 
         # normalize date
         if kind == "monthly":
-            kwargs["startDate"] = kwargs["startDate"].replace(day=1)
-            kwargs["endDate"] = kwargs["endDate"].replace(day=1) - datetime.timedelta(days=1)
+            kwargs["startDate"] = kwargs["startDate"].replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            kwargs["endDate"] = kwargs["endDate"].replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         if kind == "yearly":
-            kwargs["startDate"] = kwargs["startDate"].replace(day=1, month=1)
-            kwargs["endDate"] = kwargs["endDate"].replace(day=1, month=1) - datetime.timedelta(days=1)
+            kwargs["startDate"] = kwargs["startDate"].replace(day=1, month=1, hour=0, minute=0, second=0, microsecond=0)
+            kwargs["endDate"] = kwargs["endDate"].replace(day=1, month=1, hour=0, minute=0, second=0, microsecond=0)
 
         log.debug("requesting data (%s): %s - %s" % (kind, kwargs["startDate"], kwargs["endDate"]))
         data = h.get_data(resource=Enedis.RESOURCE[kind], **kwargs)

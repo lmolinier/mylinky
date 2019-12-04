@@ -34,11 +34,11 @@ class datedelta:
         args = []
         if self._months:
             args.append("months=%d" % self._months)
-        if self._days:
+        if self._timedelta.days:
             args.append("days=%d" % self._timedelta.days)
-        if self._seconds:
+        if self._timedelta.seconds:
             args.append("seconds=%d" % self._timedelta.seconds)
-        if self._microseconds:
+        if self._timedelta.microseconds:
             args.append("microseconds=%d" % self._timedelta.microseconds)
         if not args:
             args.append('0')
