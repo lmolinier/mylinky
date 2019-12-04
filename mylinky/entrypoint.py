@@ -152,7 +152,6 @@ USAGE
         data = enedis.getdata(args.type, startDate=startDate, endDate=endDate)
 
         if args.exporter == "influxdb":
-            (host,port) = args.host.split(":")
             influx = InfluxdbExporter(
                 host=config["influxdb"]["host"], 
                 port=config["influxdb"]["port"],
