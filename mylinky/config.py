@@ -37,13 +37,16 @@ class MyLinkyConfig():
                     d[k] = d2[k]
         return d
 
+    def load_from_dict(self, d):
+        self._merge(d)
+        log.debug("config: %s" % self.data)
+        return self
+
     def load_from_file(self, fname):
         with open(fname) as f:
             data = yaml.load(f)
         log.debug("using configuration: %s" % data)
-        self._merge(data)
-        log.debug("config: %s" % self.data)
-        return self
+        return self.load_from_dict(data)
 
     def __getitem__(self, key):
         return self.data[key]

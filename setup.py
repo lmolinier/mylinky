@@ -52,7 +52,10 @@ setup(
 
     entry_points = {
 		"console_scripts": [
-			"mylinky = mylinky.entrypoint:main"
+			"mylinky = mylinky.main:main"
 		]
 	},
+
+    setup_requires=['lambda_setuptools'],
+    lambda_function='mylinky.entrypoint:run',
 )
