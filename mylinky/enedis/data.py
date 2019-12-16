@@ -3,6 +3,7 @@ import requests
 import datetime
 from requests_toolbelt.utils import dump
 import base64
+import pytz
 
 from mylinky.datedelta import datedelta
 
@@ -66,8 +67,8 @@ class Data:
         
 
     def _transform_data(self, resource, raw, bounds=None):
-        start = datetime.datetime.strptime(raw["periode"]["dateDebut"], "%d/%m/%Y")
-        end = datetime.datetime.strptime(raw["periode"]["dateFin"], "%d/%m/%Y")
+        start = datetime.datetime.strptime(raw["periode"]["dateDebut"], "%d/%m/%Y").replace(tzinfo=pytz.timezone("Europe/Paris"))
+        end = datetime.datetime.strptime(raw["periode"]["dateFin"], "%d/%m/%Y").replace(tzinfo=pytz.timezone("Europe/Paris"))
         step = Data.STEPS[resource]
 
         if resource == Data.RESOURCE_YEARLY:
@@ -80,7 +81,7 @@ class Data:
             rank = int(item["ordre"])-1
 
             # apparently, the yearly data is a bit different and start its 'ordre' to 0, instead of 1...
-            if resource == Data.RESOURCE_YEARLY:
+            if resource in [Data.RESOURCE_YEARLY, Data.RESOURCE_MONTHLY]:
                 rank+=1
 
             # correct the start with the 'decalage' field for incomplete graphe

@@ -1,0 +1,16 @@
+{
+    "fileLocations": [
+        {
+            "URIs": [
+            ]
+        },
+        {
+            "URIPrefixes": [
+                "s3://mylinky/monthly"
+            ]
+        }
+    ],
+    "globalUploadSettings": {
+        "format": "JSON"
+    }
+}

@@ -44,7 +44,10 @@ class MyLinkyConfig():
 
     def load_from_file(self, fname):
         with open(fname) as f:
-            data = yaml.load(f)
+            return self.load_from_fileobj(f)
+
+    def load_from_fileobj(self, f):
+        data = yaml.load(f)
         log.debug("using configuration: %s" % data)
         return self.load_from_dict(data)
 
@@ -54,7 +57,7 @@ class MyLinkyConfig():
     def override_from_args(self, kwargs):
         # ENEDIS Access
         if "username" in kwargs and kwargs["username"] is not None:
-            self.data["enedis"]["user"] = kwargs["username"]
+            self.data["enedis"]["username"] = kwargs["username"]
         if "password" in kwargs and kwargs["password"] is not None:
             self.data["enedis"]["password"] = kwargs["password"]
         if "timesheet" in kwargs and kwargs["timesheet"] is not None:

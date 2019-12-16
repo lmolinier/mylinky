@@ -20,6 +20,7 @@ import pkg_resources
 import datetime
 import argparse
 import pprint
+import pytz
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -49,7 +50,7 @@ PROFILE = 0
 
 def datetime_converter(s):
     try:
-        return datetime.datetime.strptime(s, "%d/%m/%Y")
+        return datetime.datetime.strptime(s, "%d/%m/%Y").replace(tzinfo=pytz.timezone("Europe/Paris"))
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date (DD/MM/YYYY): %s" % s)
 
@@ -106,7 +107,7 @@ USAGE
         parser.add_argument("--type", choices=Enedis.RESOURCE.keys(), default="hourly", help="query data source (default: %(default)s)")
 
         date = parser.add_argument_group("date range", "select the date range")
-        date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now())
+        date.add_argument("--to", help="to/end query data range (format DD/MM/YYYY)", type=datetime_converter, default=datetime.datetime.now().replace(tzinfo=pytz.timezone("Europe/Paris")))
         group = date.add_mutually_exclusive_group()
         group.add_argument("--from", help="from/start query date range (format DD/MM/YYYY)", type=datetime_converter)
         group.add_argument("--last", help="query for last days/months/year depending 'type'", type=datedelta_converter)
