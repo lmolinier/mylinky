@@ -76,7 +76,7 @@ class Data:
             end = end.replace(day=1, month=1)
 
         data = []
-        offset = raw["decalage"] - 1 if raw["decalage"]>0 else 0
+        offset = raw["decalage"] if raw["decalage"]>0 else 0
         for item in raw["data"]:
             rank = int(item["ordre"])-1
 

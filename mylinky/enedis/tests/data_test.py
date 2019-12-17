@@ -86,7 +86,7 @@ class TestData(unittest.TestCase):
         test_data = {
             "etat": { "valeur": "termine" },
             "graphe": {
-                "decalage": 3,
+                "decalage": 2,
                 "puissanceSouscrite": 9,
                 "periode": {
                     "dateFin": "14/11/2019",
