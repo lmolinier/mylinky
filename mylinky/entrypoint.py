@@ -46,6 +46,9 @@ def run(events, context):
         log.info("running with empty sate, because of error: %s" % e)
     if resource not in state:
         state[resource] = {}
+
+    if "state" in events:
+        state.update(events["state"])
     log.info("State: %s" % state)
 
     # Load configuration
@@ -65,7 +68,7 @@ def run(events, context):
     enedis = Enedis(timesheets=config["enedis"]["timesheets"])
     enedis.login(config["enedis"]["username"], config["enedis"]["password"])
 
-    startDate = datetime.datetime.strptime(state[resource]["last"], "%d/%m/%Y").replace(tzinfo=pytz.timezone("Europe/Paris")) if "last" in state[resource] else None
+    startDate = datetime.datetime.strptime(state[resource]["last"], "%d/%m/%Y").replace(tzinfo=pytz.timezone("Europe/Paris"))+datedelta(days=1) if "last" in state[resource] else None
     endDate = datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0,tzinfo=pytz.timezone("Europe/Paris"))
     if startDate is None:
         # Max retention in ENEDIS is 1 year
@@ -78,11 +81,12 @@ def run(events, context):
     
     data = enedis.getdata(resource, startDate=startDate, endDate=endDate)
 
-    if len(data):
+    if len(data) and startDate == data[0]["date"]:
         s3.Bucket(BUCKET).put_object(Key="%s/%s.json" % (resource, endDate.strftime("%Y-%m-%d")), Body=json.dumps(data, default=json_converter).encode("utf-8"))
 
         # Save the state
-        state[resource]["last"] = endDate.strftime("%d/%m/%Y")
+        lastDate = data[-1]["date"]
+        state[resource]["last"] = lastDate.strftime("%d/%m/%Y")
         s3.Bucket(BUCKET).put_object(Key="state.json", Body=json.dumps(state).encode("utf-8"))
 
     response.append({
