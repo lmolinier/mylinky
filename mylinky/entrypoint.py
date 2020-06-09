@@ -18,6 +18,7 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
 BUCKET = "mylinky"
+PASSWORD_TYPE = os.environ["PASSWORD_TYPE"]
 ENEDIS_USERNAME = os.environ["ENEDIS_USERNAME"]
 ENEDIS_PASSWORD = os.environ["ENEDIS_PASSWORD"]
 
@@ -28,12 +29,20 @@ def json_converter(o):
 def run(events, context):
     response = []
 
+    s3 = boto3.resource("s3")
     log.setLevel(logging.getLevelName(events["log"] if "log" in events else "INFO"))
 
     resource = events["resource"] if "resource" in events else "hourly"
-    username = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ENEDIS_USERNAME))['Plaintext'].decode()
-    password = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ENEDIS_PASSWORD))['Plaintext'].decode()
-    s3 = boto3.resource("s3")
+    if PASSWORD_TYPE == "kms":
+        username = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ENEDIS_USERNAME))['Plaintext'].decode()
+        password = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ENEDIS_PASSWORD))['Plaintext'].decode()
+    elif PASSWORD_TYPE == "s3:clear":
+        with tempfile.TemporaryFile() as f:
+            s3.Bucket(BUCKET).download_fileobj(Key="creds.json", Fileobj=f)
+            f.seek(0)
+            creds = json.load(f)
+            username = creds["username"]
+            password = creds["password"]
 
     # Load the state from s3
     state = {}
