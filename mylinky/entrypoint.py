@@ -18,9 +18,9 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
 BUCKET = "mylinky"
-PASSWORD_TYPE = os.environ["PASSWORD_TYPE"]
-ENEDIS_USERNAME = os.environ["ENEDIS_USERNAME"]
-ENEDIS_PASSWORD = os.environ["ENEDIS_PASSWORD"]
+PASSWORD_TYPE = os.environ["PASSWORD_TYPE"] if "PASSWORD_TYPE" in os.environ else "kms"
+ENEDIS_USERNAME = os.environ["ENEDIS_USERNAME"] if "ENEDIS_USENAME" in os.environ else None
+ENEDIS_PASSWORD = os.environ["ENEDIS_PASSWORD"] if "ENEDIS_PASSWORD" in os.environ else None
 
 def json_converter(o):
     if isinstance(o, datetime.datetime):
