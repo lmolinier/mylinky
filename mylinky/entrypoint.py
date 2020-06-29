@@ -60,6 +60,16 @@ def run(events, context):
         state.update(events["state"])
     log.info("State: %s" % state)
 
+    # Load holes from s3
+    holes = []
+    try:
+        with tempfile.TemporaryFile() as f:
+            s3.Bucket(BUCKET).download_fileobj(Key="holes.json", Fileobj=f)
+            f.seek(0)
+            holes = json.load(f)
+    except Exception as e:
+        log.info("running with empty holes, because of error: %s" % e)
+
     # Load configuration
     config = MyLinkyConfig()
     try:
@@ -90,7 +100,13 @@ def run(events, context):
     
     data = enedis.getdata(resource, startDate=startDate, endDate=endDate)
 
-    if len(data) and startDate == data[0]["date"]:
+    if len(data)==0:
+        log.info("Empty data")
+    else:
+        if startDate < data[0]["date"]:
+            holes.append({"start": startDate, "end": data[0]["date"]})
+            s3.Bucket(BUCKET).put_object(Key="holes.json", Body=json.dumps(holes, default=json_converter).encode("utf-8"))
+
         s3.Bucket(BUCKET).put_object(Key="%s/%s.json" % (resource, endDate.strftime("%Y-%m-%d")), Body=json.dumps(data, default=json_converter).encode("utf-8"))
 
         # Save the state
